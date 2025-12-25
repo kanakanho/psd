@@ -7,9 +7,14 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix"
   },
+  "dependencies": {
+    "pako": "^2.1.0"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "^6.7.3",
+    "@types/pako": "^2.0.3",
     "eslint": "^9.39.2",
-    "tsup": "^8.5.1"
+    "tsup": "^8.5.1",
+    "typescript": "^5.7.2"
   }
 }

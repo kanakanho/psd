@@ -14,6 +14,7 @@ import type {
   PSD,
   Rectangle,
 } from './types'
+import { isValidColorMode } from './colormode'
 import { decodeCompressed } from './compress'
 import {
   AdditionalInfoKeyBlendClippingElements,
@@ -103,6 +104,10 @@ export function decodeConfig(buffer: Uint8Array): { config: Config, bytesRead: n
   const colorMode = readUint16(buffer, offset)
   offset += 2
 
+  if (!isValidColorMode(colorMode)) {
+    throw new Error(`psd: invalid color mode: ${colorMode}`)
+  }
+
   // Color mode data
   const colorModeDataLen = readUint32(buffer, offset)
   offset += 4
@@ -118,7 +123,7 @@ export function decodeConfig(buffer: Uint8Array): { config: Config, bytesRead: n
     rect,
     channels,
     depth,
-    colorMode: colorMode as any,
+    colorMode,
     colorModeData,
     res,
   }

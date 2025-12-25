@@ -4,7 +4,7 @@
  */
 
 import type { CompressionMethod, Rectangle } from './types'
-import pako from 'pako'
+import * as pako from 'pako'
 import {
   CompressionMethodRaw,
   CompressionMethodRLE,

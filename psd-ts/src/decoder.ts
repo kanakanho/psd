@@ -5,6 +5,7 @@
 
 import type {
   AdditionalInfoKey,
+  CompressionMethod,
   Config,
   DecodeOptions,
   ImageResource,
@@ -200,14 +201,14 @@ export function decode(buffer: Uint8Array, options: DecodeOptions = {}): PSD {
 
   // Merged image data
   if (!options.skipMergedImage) {
-    const compressionMethod = readUint16(buffer, offset)
+    const compressionMethod = readUint16(buffer, offset) as CompressionMethod
     offset += 2
 
     const plane = ((config.rect.width * config.depth + 7) >> 3) * config.rect.height
     const data = new Uint8Array(plane * config.channels)
 
     const read = decodeCompressed(
-      compressionMethod as any,
+      compressionMethod,
       data,
       buffer.slice(offset),
       config.rect,
@@ -362,9 +363,9 @@ function readLayerInfo(
 
     const channelData: Array<{ chIndex: number, dataLen: number }> = []
     for (let j = 0; j < numChannels; j++) {
-      const chIndex = readUint16(buffer, offset) as any as number
-      // Convert to signed
-      const signedChIndex = chIndex > 32767 ? chIndex - 65536 : chIndex
+      const chIndex = readUint16(buffer, offset)
+      // Convert to signed 16-bit integer
+      const signedChIndex = chIndex > 0x7FFF ? chIndex - 0x10000 : chIndex
       offset += 2
 
       const dataLen = Number(readUint(buffer, offset, intSize))
@@ -670,9 +671,9 @@ function readLayerImages(
       let readCh = 0
 
       // Compression method
-      let cmpMethod = 0
+      let cmpMethod: CompressionMethod = 0
       if (ch.dataLen >= 2) {
-        cmpMethod = readUint16(buffer, offset)
+        cmpMethod = readUint16(buffer, offset) as CompressionMethod
         offset += 2
         readCh += 2
       }
@@ -696,7 +697,7 @@ function readLayerImages(
       // Decode
       if (ch.dataLen > 2) {
         const read = decodeCompressed(
-          cmpMethod as any,
+          cmpMethod,
           data,
           buffer.slice(offset, offset + ch.dataLen - 2),
           rect,

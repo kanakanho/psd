@@ -4,6 +4,8 @@
   "packageManager": "pnpm@10.25.0",
   "scripts": {
     "build": "tsup",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
     "lint": "eslint",
     "lint:fix": "eslint --fix"
   },
@@ -13,8 +15,10 @@
   "devDependencies": {
     "@antfu/eslint-config": "^6.7.3",
     "@types/pako": "^2.0.3",
+    "@vitest/ui": "^4.0.16",
     "eslint": "^9.39.2",
     "tsup": "^8.5.1",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.16"
   }
 }

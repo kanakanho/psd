@@ -1,0 +1,15 @@
+{
+  "name": "psd-ts",
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.25.0",
+  "scripts": {
+    "build": "tsup",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^6.7.3",
+    "eslint": "^9.39.2",
+    "tsup": "^8.5.1"
+  }
+}

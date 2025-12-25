@@ -3,20 +3,20 @@
  * Ported from Go implementation
  */
 
-import pako from 'pako'
 import type { CompressionMethod, Rectangle } from './types'
+import pako from 'pako'
 import {
   CompressionMethodRaw,
   CompressionMethodRLE,
   CompressionMethodZIPWithoutPrediction,
   CompressionMethodZIPWithPrediction,
 } from './constants'
-import { get4or8, itoa, readUint, readUint16, readUint32, writeUint16, writeUint32 } from './util'
+import { get4or8, readUint, readUint16, readUint32, writeUint16, writeUint32 } from './util'
 
 /**
  * Decode compressed image data
  */
-export function decode(
+export function decodeCompressed(
   method: CompressionMethod,
   dest: Uint8Array,
   src: Uint8Array,

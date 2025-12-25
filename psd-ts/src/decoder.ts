@@ -5,7 +5,6 @@
 
 import type {
   AdditionalInfoKey,
-  Channel,
   Config,
   DecodeOptions,
   ImageResource,
@@ -14,6 +13,7 @@ import type {
   PSD,
   Rectangle,
 } from './types'
+import { decodeCompressed } from './compress'
 import {
   AdditionalInfoKeyBlendClippingElements,
   AdditionalInfoKeyLayerInfo,
@@ -26,21 +26,17 @@ import {
   LARGE_DOC_KEYS,
   SECTION_SIGNATURE,
 } from './constants'
-import { getColorModeChannels } from './colormode'
-import { decode as decodeCompress } from './compress'
 import {
   adjustAlign2,
   adjustAlign4,
   get4or8,
   getString,
-  itoa,
+  readFloat64,
   readPascalString,
   readUint,
   readUint16,
   readUint32,
-  readUint64,
   readUnicodeString,
-  readFloat64,
 } from './util'
 
 /**
@@ -182,7 +178,7 @@ function readImageResources(buffer: Uint8Array): { res: Map<number, ImageResourc
 /**
  * Check if image has alpha channel based on resource ID
  */
-function hasAlphaID0(res: Map<number, ImageResource>): boolean {
+function _hasAlphaID0(res: Map<number, ImageResource>): boolean {
   // Resource ID 0x0417 indicates transparency index
   return res.has(0x0417)
 }
@@ -210,7 +206,7 @@ export function decode(buffer: Uint8Array, options: DecodeOptions = {}): PSD {
     const plane = ((config.rect.width * config.depth + 7) >> 3) * config.rect.height
     const data = new Uint8Array(plane * config.channels)
 
-    const read = decodeCompress(
+    const read = decodeCompressed(
       compressionMethod as any,
       data,
       buffer.slice(offset),
@@ -624,11 +620,9 @@ function readLayerMaskData(buffer: Uint8Array, layer: Layer): { bytesRead: numbe
  */
 function readSectionDividerSetting(layer: Layer): void {
   let data = layer.additionalLayerInfo.get(AdditionalInfoKeySectionDividerSetting)
-  let key = AdditionalInfoKeySectionDividerSetting
 
   if (!data) {
     data = layer.additionalLayerInfo.get(AdditionalInfoKeySectionDividerSetting2)
-    key = AdditionalInfoKeySectionDividerSetting2
   }
 
   if (!data) {
@@ -701,7 +695,7 @@ function readLayerImages(
 
       // Decode
       if (ch.dataLen > 2) {
-        const read = decodeCompress(
+        const read = decodeCompressed(
           cmpMethod as any,
           data,
           buffer.slice(offset, offset + ch.dataLen - 2),

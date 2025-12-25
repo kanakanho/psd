@@ -26,8 +26,8 @@ pnpm install
 ## Usage
 
 ```typescript
+import * as fs from 'node:fs'
 import { decode, decodeConfig } from 'psd-ts'
-import * as fs from 'fs'
 
 // Read PSD file
 const buffer = fs.readFileSync('image.psd')
@@ -52,8 +52,8 @@ You can pass options to skip certain parts of the decoding:
 
 ```typescript
 const psd = decode(uint8Array, {
-  skipLayerImage: true,   // Skip decoding layer image data
-  skipMergedImage: true,  // Skip decoding merged/flattened image
+  skipLayerImage: true, // Skip decoding layer image data
+  skipMergedImage: true, // Skip decoding merged/flattened image
 })
 ```
 

@@ -1,10 +1,25 @@
-# PSD/PSB(Photoshop) file reader for Go programming language
+# PSD/PSB(Photoshop) file reader for Go and TypeScript
+
+This project provides PSD file readers for both Go and TypeScript programming languages.
 
 It works almost well but it is still in development.
 
-## How to use
+## TypeScript Implementation
 
-### Example1
+A complete TypeScript port is available in the `./psd-ts` directory. The TypeScript implementation:
+
+- Uses functional programming style (no classes)
+- Has full feature parity with the Go implementation
+- Provides comprehensive type definitions
+- Supports all major PSD features (layers, compression, color modes, etc.)
+
+See [psd-ts/README.md](./psd-ts/README.md) for TypeScript usage and documentation.
+
+## Go Implementation
+
+### How to use
+
+#### Example1
 
 Simple psd -> png conversion.
 
@@ -42,7 +57,7 @@ func main() {
 }
 ```
 
-### Example2
+#### Example2
 
 Extract all layer images.
 

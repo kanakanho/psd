@@ -18,6 +18,10 @@ This is a port of the Go PSD reader library to TypeScript, implemented without u
 ## Installation
 
 ```bash
+npm install -g pnpm
+```
+
+```bash
 pnpm install
 ```
 

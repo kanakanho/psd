@@ -7,7 +7,7 @@ import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { ColorModeBitmap, ColorModeCMYK, ColorModeGrayscale, ColorModeIndexed, ColorModeRGB } from '../constants'
-import { decodeConfig } from '../decoder'
+import { decode, decodeConfig, hasLayerImage, isLayerFolder, isLayerVisible } from '../decoder'
 
 const testdataDir = path.resolve(__dirname, '../../../testdata')
 
@@ -94,33 +94,58 @@ describe('decoder - decodeConfig', () => {
   })
 })
 
-// Note: Full decode() tests are commented out due to performance issues
-// They work but take too long to run in CI. Use them for local testing.
-// describe('decoder - decode with options', () => {
-//   it('should skip merged image when requested', () => {
-//     const buffer = readTestFile('rgb8bit.psd')
-//     const psd = decode(buffer, { skipMergedImage: true })
-//
-//     expect(psd).toBeDefined()
-//     expect(psd.data.length).toBe(0) // No merged image data
-//   })
-//
-//   it('should skip layer images when requested', () => {
-//     const buffer = readTestFile('rgb8bit_nobg.psd')
-//     const psd = decode(buffer, { skipLayerImage: true })
-//
-//     expect(psd).toBeDefined()
-//     // Layers should exist but without image data
-//     if (psd.layer.length > 0) {
-//       const firstLayer = psd.layer[0]
-//       expect(firstLayer.channel.size).toBe(0)
-//     }
-//   })
-// })
+describe('decoder - decode with skip options (fast)', () => {
+  it('should skip both layer and merged images', () => {
+    const buffer = readTestFile('bitmap.psd')
+    const psd = decode(buffer, {
+      skipLayerImage: true,
+      skipMergedImage: true,
+    })
+
+    expect(psd).toBeDefined()
+    expect(psd.config.version).toBe(1)
+    expect(psd.data.length).toBe(0)
+  })
+
+  it('should decode indexed with color mode data', () => {
+    const buffer = readTestFile('indexed.psd')
+    const psd = decode(buffer, {
+      skipLayerImage: true,
+      skipMergedImage: true,
+    })
+
+    expect(psd).toBeDefined()
+    expect(psd.config.colorMode).toBe(ColorModeIndexed)
+    expect(psd.config.colorModeData.length).toBeGreaterThan(0)
+  })
+})
+
+describe('decoder - layer helper functions', () => {
+  it('should use helper functions without errors', () => {
+    const buffer = readTestFile('rgb8bit_nobg.psd')
+    const psd = decode(buffer, { skipLayerImage: true, skipMergedImage: true })
+
+    if (psd.layer.length > 0) {
+      const layer = psd.layer[0]
+      const visible = isLayerVisible(layer)
+      const hasImage = hasLayerImage(layer)
+      const isFolder = isLayerFolder(layer)
+
+      expect(typeof visible).toBe('boolean')
+      expect(typeof hasImage).toBe('boolean')
+      expect(typeof isFolder).toBe('boolean')
+    }
+  })
+})
 
 describe('decoder - error handling', () => {
   it('should throw error for invalid signature', () => {
-    const buffer = new Uint8Array([0x00, 0x00, 0x00, 0x00])
+    const buffer = new Uint8Array([
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+    ])
     expect(() => decodeConfig(buffer)).toThrow('psd: invalid format')
   })
 

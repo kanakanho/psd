@@ -72,9 +72,6 @@ export function decodeZLIB(dest: Uint8Array, src: Uint8Array): number {
   }
 }
 
-/**
- * Decode PackBits RLE compressed data
- */
 export function decodePackBits(
   dest: Uint8Array,
   src: Uint8Array,
@@ -85,15 +82,12 @@ export function decodePackBits(
   const intSize = get4or8(large)
   let srcOffset = 0
 
-  // Read line lengths
-  const lineLengths: number[] = []
+  const lineLengths = new Uint32Array(lines)
   for (let i = 0; i < lines; i++) {
-    const len = Number(readUint(src, srcOffset, intSize))
-    lineLengths.push(len)
+    lineLengths[i] = Number(readUint(src, srcOffset, intSize))
     srcOffset += intSize
   }
 
-  // Decode each line
   let destOffset = 0
   for (let i = 0; i < lines; i++) {
     const lineLength = lineLengths[i]
@@ -103,28 +97,28 @@ export function decodePackBits(
       const n = src[srcOffset++]
 
       if (n === 128) {
-        // No-op
         continue
       }
       else if (n > 128) {
-        // Run of repeated bytes
         const count = 257 - n
-        if (srcOffset >= src.length) {
-          throw new Error('psd: compressed image data seems broken')
-        }
         const value = src[srcOffset++]
-        for (let j = 0; j < count && destOffset < dest.length; j++) {
-          dest[destOffset++] = value
-        }
+
+        const writeCount = Math.min(count, dest.length - destOffset)
+        dest.fill(value, destOffset, destOffset + writeCount)
+        destOffset += writeCount
       }
       else {
-        // Run of literal bytes
         const count = n + 1
-        for (let j = 0; j < count && destOffset < dest.length && srcOffset < src.length; j++) {
-          dest[destOffset++] = src[srcOffset++]
-        }
+
+        const writeCount = Math.min(count, dest.length - destOffset, src.length - srcOffset)
+        dest.set(src.subarray(srcOffset, srcOffset + writeCount), destOffset)
+
+        srcOffset += writeCount
+        destOffset += writeCount
       }
     }
+
+    srcOffset = lineEnd
   }
 
   return srcOffset
